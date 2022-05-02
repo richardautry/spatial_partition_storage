@@ -12,6 +12,10 @@ engine = create_engine("postgresql://postgres:postgres@postgres")
 SQLModel.metadata.create_all(engine)
 
 
+# TODO: Convert box class to numpy array
+# TODO: Build KDTree with numpy array
+# TODO: Store Box instances via partitions and Partition class
+
 @app.get("/")
 def read_root():
     return {"Hello": "world"}
