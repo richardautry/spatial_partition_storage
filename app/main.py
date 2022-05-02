@@ -1,39 +1,41 @@
 from typing import Optional
 
 from fastapi import FastAPI
-from sqlmodel import Field, SQLModel, Session, create_engine, select
+from sqlmodel import SQLModel, Session, create_engine, select
+from app.models.objects import Box
 
 app = FastAPI()
-
-
-class Hero(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str
-    secret_name: str
-    age: Optional[int] = None
 
 
 engine = create_engine("postgresql://postgres:postgres@postgres")
 
 SQLModel.metadata.create_all(engine)
 
-hero_1 = Hero(name="Deadpond", secret_name="Dive Wilson")
-
-
-with Session(engine) as session:
-    session.add(hero_1)
-    session.commit()
-
 
 @app.get("/")
 def read_root():
+    return {"Hello": "world"}
+
+
+@app.get("/boxes/{box_id}")
+def read_item(box_id: int, q: Optional[str] = None):
+    return {"box_id": box_id, "q": q}
+
+
+@app.get("/boxes/")
+def get_boxes():
     with Session(engine) as session:
-        statement = select(Hero).where(Hero.name == "Deadpond")
-        hero = session.exec(statement).first()
-        print(hero)
-        return hero
+        statement = select(Box)
+        results = session.exec(statement).all()
+
+    return results
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/boxes/")
+def post_box(box: Box):
+    with Session(engine) as session:
+        session.add(box)
+        session.commit()
+        session.refresh(box)
+
+    return box

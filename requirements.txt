@@ -11,6 +11,7 @@ psycopg2-binary==2.9.3
 pydantic==1.9.0
 python-dotenv==0.20.0
 PyYAML==6.0
+scipy==1.8.0
 sniffio==1.2.0
 SQLAlchemy==1.4.36
 sqlalchemy2-stubs==0.0.2a22
