@@ -130,3 +130,6 @@ dmypy.json
 
 # PyCharm
 .idea/
+
+# Project specific
+design-and-novel-uses-of-higher-dimensional-rasterization-256441.pdf
