@@ -11,21 +11,52 @@ class XBoxLink(SQLModel, table=True):
     x_id: Optional[int] = Field(default=None, foreign_key="x.id", primary_key=True)
 
 
-class Box(SQLModel, table=True):
-    id: Optional[UUID4] = Field(default=uuid4, primary_key=True)
+class BoxBase(SQLModel):
     x_min: float
     x_max: float
-    x_values: List["X"] = Relationship(back_populates="boxes",  link_model=XBoxLink)
     y_min: float
     y_max: float
     z_min: float
     z_max: float
 
 
-# TODO: Dimension lookup table for x
-class X(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+class Box(BoxBase, table=True):
+    id: Optional[UUID4] = Field(default=uuid4, primary_key=True)
+
+    x_values: List["X"] = Relationship(back_populates="boxes", link_model=XBoxLink)
+
+
+class BoxCreate(BoxBase):
+    pass
+
+
+class BoxRead(BoxBase):
+    id: UUID4
+
+
+class XBase(SQLModel):
+    pass
+
+
+class X(XBase, table=True):
+    id: int = Field(default=None, primary_key=True)
     boxes: List[Box] = Relationship(back_populates="x_values", link_model=XBoxLink)
+
+
+class XRead(XBase):
+    id: int
+
+
+class BoxReadWithX(BoxRead):
+    x_values: List[XRead] = []
+
+
+class XReadWithBoxes(XRead):
+    boxes: List[BoxRead] = []
+
+
+
+
 
 # TODO: Dimension lookup table for y
 
