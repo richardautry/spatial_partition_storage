@@ -12,9 +12,7 @@ engine = create_engine("postgresql://postgres:postgres@postgres")
 SQLModel.metadata.create_all(engine)
 
 
-# TODO: Convert box class to numpy array
-# TODO: Build KDTree with numpy array
-# TODO: Store Box instances via partitions and Partition class
+# TODO: Env Var to set fidelity/sampling frequency
 
 @app.get("/")
 def read_root():
@@ -38,6 +36,10 @@ def get_boxes():
 @app.post("/boxes/")
 def post_box(box: Box):
     with Session(engine) as session:
+        # TODO: Function for creating x, y, z lookups
+
+        # TODO: Quick test creating many to many per tutuorial before continuing
+        # https://sqlmodel.tiangolo.com/tutorial/many-to-many/create-data/
         session.add(box)
         session.commit()
         session.refresh(box)
