@@ -7,10 +7,12 @@ from app.models.objects import (
     Box,
     X,
     Y,
+    Z,
     BoxReadWithValues,
     XReadWithBoxes,
     XBoxLink,
     YBoxLink,
+    ZBoxLink,
     BoxRead
 )
 from app.utils import get_dimension_values
@@ -38,13 +40,16 @@ def get_boxes(
     *,
     session: Session = Depends(get_session),
     x: Union[int, None] = None,
-    y: Union[int, None] = None
+    y: Union[int, None] = None,
+    z: Union[int, None] = None
 ):
     statement = select(Box)
     if x:
         statement = statement.join(XBoxLink).join(X).where(X.id == x - x % fidelity)
     if y:
         statement = statement.join(YBoxLink).join(Y).where(Y.id == y - y % fidelity)
+    if z:
+        statement = statement.join(ZBoxLink).join(Z).where(Z.id == z - z % fidelity)
     results = session.exec(statement).all()
     return results
 

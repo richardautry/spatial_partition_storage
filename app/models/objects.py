@@ -17,6 +17,11 @@ class YBoxLink(SQLModel, table=True):
     y_id: Optional[int] = Field(default=None, foreign_key="y.id", primary_key=True)
 
 
+class ZBoxLink(SQLModel, table=True):
+    box_id: Optional[UUID4] = Field(default=None, foreign_key="box.id", primary_key=True)
+    z_id: Optional[int] = Field(default=None, foreign_key="z.id", primary_key=True)
+
+
 class BoxBase(SQLModel):
     x_min: float
     x_max: float
@@ -31,6 +36,7 @@ class Box(BoxBase, table=True):
 
     x_values: List["X"] = Relationship(back_populates="boxes", link_model=XBoxLink)
     y_values: List["Y"] = Relationship(back_populates="boxes", link_model=YBoxLink)
+    z_values: List["Z"] = Relationship(back_populates="boxes", link_model=ZBoxLink)
 
 
 class BoxCreate(BoxBase):
@@ -71,11 +77,20 @@ class YRead(YBase):
     id: int
 
 
+class ZBase(SQLModel):
+    pass
+
+
+class Z(ZBase, table=True):
+    id: int = Field(default=None, primary_key=True)
+    boxes: List[Box] = Relationship(back_populates="z_values", link_model=ZBoxLink)
+
+
+class ZRead(ZBase):
+    id: int
+
+
 class BoxReadWithValues(BoxRead):
     x_values: List[XRead] = []
     y_values:  List[YRead] = []
-
-# TODO: Dimension lookup table for z
-
-# TODO: Many to Many link between box and y
-# TODO: Many to Many link between box and z
+    z_values: List[ZRead] = []
