@@ -1,9 +1,18 @@
 from pydantic import UUID4
-from typing import List
+from typing import List, Union
 
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session, create_engine, select
-from app.models.objects import Box, X, BoxReadWithX, XReadWithBoxes
+from app.models.objects import (
+    Box,
+    X,
+    Y,
+    BoxReadWithValues,
+    XReadWithBoxes,
+    XBoxLink,
+    YBoxLink,
+    BoxRead
+)
 from app.utils import get_dimension_values
 
 app = FastAPI()
@@ -24,14 +33,23 @@ fidelity = 10
 
 # TODO: Switch to Depends session
 # TODO: Add query params
-@app.get("/boxes/")
-def get_boxes(*, session: Session = Depends(get_session)):
+@app.get("/boxes/", response_model=List[BoxRead])
+def get_boxes(
+    *,
+    session: Session = Depends(get_session),
+    x: Union[int, None] = None,
+    y: Union[int, None] = None
+):
     statement = select(Box)
+    if x:
+        statement = statement.join(XBoxLink).join(X).where(X.id == x - x % fidelity)
+    if y:
+        statement = statement.join(YBoxLink).join(Y).where(Y.id == y - y % fidelity)
     results = session.exec(statement).all()
     return results
 
 
-@app.get("/boxes/{box_id}", response_model=BoxReadWithX)
+@app.get("/boxes/{box_id}", response_model=BoxReadWithValues)
 def get_box(*, session: Session = Depends(get_session), box_id: UUID4):
     box = session.get(Box, box_id)
     if not box:
@@ -39,7 +57,7 @@ def get_box(*, session: Session = Depends(get_session), box_id: UUID4):
     return box
 
 
-@app.post("/boxes/", response_model=BoxReadWithX)
+@app.post("/boxes/", response_model=BoxReadWithValues)
 def post_box(*, session: Session = Depends(get_session), box: Box):
     # with Session(engine) as session:
     # TODO: Function for creating y, z lookups
@@ -48,6 +66,13 @@ def post_box(*, session: Session = Depends(get_session), box: Box):
         model=X,
         min_val=int(box.x_min),
         max_val=int(box.x_max),
+        step_size=fidelity
+    )
+    box.y_values = get_dimension_values(
+        session=session,
+        model=Y,
+        min_val=int(box.y_min),
+        max_val=int(box.y_max),
         step_size=fidelity
     )
     session.add(box)

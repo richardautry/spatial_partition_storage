@@ -5,10 +5,16 @@ from pydantic import UUID4
 from uuid import uuid4
 
 
-# TODO: Many to Many link between box and x
+# TODO: Experiment with using one master Coordinates table
+# i.e. dimension ("x", "y", etc.), val (0, 10, 20, ...) and CoordinatesBoxLink
 class XBoxLink(SQLModel, table=True):
     box_id: Optional[UUID4] = Field(default=None, foreign_key="box.id", primary_key=True)
     x_id: Optional[int] = Field(default=None, foreign_key="x.id", primary_key=True)
+
+
+class YBoxLink(SQLModel, table=True):
+    box_id: Optional[UUID4] = Field(default=None, foreign_key="box.id", primary_key=True)
+    y_id: Optional[int] = Field(default=None, foreign_key="y.id", primary_key=True)
 
 
 class BoxBase(SQLModel):
@@ -24,6 +30,7 @@ class Box(BoxBase, table=True):
     id: Optional[UUID4] = Field(default=uuid4, primary_key=True)
 
     x_values: List["X"] = Relationship(back_populates="boxes", link_model=XBoxLink)
+    y_values: List["Y"] = Relationship(back_populates="boxes", link_model=YBoxLink)
 
 
 class BoxCreate(BoxBase):
@@ -47,18 +54,26 @@ class XRead(XBase):
     id: int
 
 
-class BoxReadWithX(BoxRead):
-    x_values: List[XRead] = []
-
-
 class XReadWithBoxes(XRead):
     boxes: List[BoxRead] = []
 
 
+class YBase(SQLModel):
+    pass
 
 
+class Y(YBase, table=True):
+    id: int = Field(default=None, primary_key=True)
+    boxes: List[Box] = Relationship(back_populates="y_values", link_model=YBoxLink)
 
-# TODO: Dimension lookup table for y
+
+class YRead(YBase):
+    id: int
+
+
+class BoxReadWithValues(BoxRead):
+    x_values: List[XRead] = []
+    y_values:  List[YRead] = []
 
 # TODO: Dimension lookup table for z
 
