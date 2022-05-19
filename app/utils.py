@@ -17,6 +17,8 @@ def get_stepped_values(min_val: int, max_val: int, step_size: int) -> List[int]:
     """
     range_min = min_val - min_val % step_size
     range_max = max_val - max_val % step_size
+    if range_min == range_max:
+        return [range_min]
     return list(range(range_min, range_max + 1, step_size))
 
 

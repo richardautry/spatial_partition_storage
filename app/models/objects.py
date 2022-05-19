@@ -90,6 +90,10 @@ class ZRead(ZBase):
     id: int
 
 
+class ZReadWithBoxes(ZRead):
+    boxes: List[BoxRead] = []
+
+
 class BoxReadWithValues(BoxRead):
     x_values: List[XRead] = []
     y_values:  List[YRead] = []

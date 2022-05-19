@@ -10,6 +10,7 @@ from app.models.objects import (
     Z,
     BoxReadWithValues,
     XReadWithBoxes,
+    ZReadWithBoxes,
     XBoxLink,
     YBoxLink,
     ZBoxLink,
@@ -44,11 +45,11 @@ def get_boxes(
     z: Union[int, None] = None
 ):
     statement = select(Box)
-    if x:
+    if x is not None:
         statement = statement.join(XBoxLink).join(X).where(X.id == x - x % fidelity)
-    if y:
+    if y is not None:
         statement = statement.join(YBoxLink).join(Y).where(Y.id == y - y % fidelity)
-    if z:
+    if z is not None:
         statement = statement.join(ZBoxLink).join(Z).where(Z.id == z - z % fidelity)
     results = session.exec(statement).all()
     return results
@@ -80,6 +81,13 @@ def post_box(*, session: Session = Depends(get_session), box: Box):
         max_val=int(box.y_max),
         step_size=fidelity
     )
+    box.z_values = get_dimension_values(
+        session=session,
+        model=Z,
+        min_val=int(box.z_min),
+        max_val=int(box.z_max),
+        step_size=fidelity
+    )
     session.add(box)
     session.commit()
     session.refresh(box)
@@ -90,6 +98,14 @@ def post_box(*, session: Session = Depends(get_session), box: Box):
 @app.get("/x/", response_model=List[XReadWithBoxes])
 def get_x(*, session: Session = Depends(get_session)):
     statement = select(X)
+    results = session.exec(statement).all()
+
+    return results
+
+
+@app.get("/z/", response_model=List[ZReadWithBoxes])
+def get_z(*, session: Session = Depends(get_session)):
+    statement = select(Z)
     results = session.exec(statement).all()
 
     return results
