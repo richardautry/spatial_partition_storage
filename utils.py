@@ -17,6 +17,14 @@ def get_box_min_max(box_range: List[int]):
     return box_range[min_index], box_range[max_index]
 
 
+def get_box_points_array(x_min, x_max, y_min, y_max, z_min, z_max):
+    return np.array([
+        [x_min, x_min, x_max, x_max, x_min, x_min, x_max, x_max, ],
+        [y_min, y_max, y_max, y_min, y_min, y_max, y_max, y_min, ],
+        [z_min, z_min, z_min, z_min, z_max, z_max, z_max, z_max, ]
+    ])
+
+
 def generate_box(range_min, range_max):
     box_range = list(range(range_min, range_max))
 
@@ -24,11 +32,7 @@ def generate_box(range_min, range_max):
     y_min, y_max = get_box_min_max(box_range)
     z_min, z_max = get_box_min_max(box_range)
 
-    return np.array([
-        [x_min, x_min, x_max, x_max, x_min, x_min, x_max, x_max, ],
-        [y_min, y_max, y_max, y_min, y_min, y_max, y_max, y_min, ],
-        [z_min, z_min, z_min, z_min, z_max, z_max, z_max, z_max, ]
-    ])
+    return get_box_points_array(x_min, x_max, y_min, y_max, z_min, z_max)
 
 
 def add_3d_line(fig, coordinates: np.array):

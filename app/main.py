@@ -34,8 +34,7 @@ def get_session():
 fidelity = 10
 
 
-# TODO: Switch to Depends session
-# TODO: Add query params
+# TODO: Add feature to search for all boxes near input box
 @app.get("/boxes/", response_model=List[BoxRead])
 def get_boxes(
     *,
