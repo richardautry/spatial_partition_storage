@@ -35,6 +35,7 @@ fidelity = 10
 
 
 # TODO: Add feature to search for all boxes near input box
+# TODO: Add limit query param
 @app.get("/boxes/", response_model=List[BoxRead])
 def get_boxes(
     *,
