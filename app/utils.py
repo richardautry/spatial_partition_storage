@@ -3,6 +3,9 @@ from sqlmodel.orm.session import _TSelectParam
 from typing import List, Optional, Type, Union
 
 
+_OPERATOR_TYPES = ("eq", "ge", "le")
+
+
 def get_stepped_value(val, step_size):
     return val - val % step_size
 
@@ -42,28 +45,33 @@ def get_dimension_values(
 
 
 class DimensionQuery:
-    def __init__(self, Model, LinkModel, fidelity: int = 0):
+    def __init__(self, Model: Type[SQLModel], LinkModel: Type[SQLModel], fidelity: int = 0):
         self.Model = Model
         self.LinkModel = LinkModel
         self.fidelity = fidelity
 
-    def get_statement(self, value: Union[int, None], statement, type: str):
+    def get_statement(self, value: Union[int, None], statement, operator_type: str):
         if value is None:
             # We don't need to append to the statement if query parm was no provided
             return statement
 
         statement = statement.join(self.LinkModel).join(self.Model)
         if type == "eq":
-            return self.get_eq_statement(statement)
+            return self.get_eq_statement(statement, value)
         elif type == "ge":
-            return self.get_ge_statement(statement)
+            return self.get_ge_statement(statement, value)
         elif type == "le":
-            return self.get_le_statement(statement)
+            return self.get_le_statement(statement, value)
         else:
-            raise Exception(f"Unknown statement type: {type}")
+            raise Exception(f"Unknown statement 'operator_type': {operator_type}.\n"
+                            f"Options are: {_OPERATOR_TYPES}")
 
     def get_eq_statement(self, statement, value):
-        return statement.where(self.Model == get_stepped_value(value, self.fidelity))
+        # TODO: Make this prettier by ensuring id exists before returning statement
+        return statement.where(self.Model.id == get_stepped_value(value, self.fidelity))
 
     def get_ge_statement(self, statement, value):
-        return statement.where(self.Model.id >=)
+        return statement.where(self.Model.id >= get_stepped_value(value, self.fidelity))
+
+    def get_le_statement(self, statement, value):
+        return statement.where(self.Model.id <= get_stepped_value(value, self.fidelity))

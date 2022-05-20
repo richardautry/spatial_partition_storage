@@ -16,7 +16,7 @@ from app.models.objects import (
     ZBoxLink,
     BoxRead
 )
-from app.utils import get_dimension_values, get_stepped_value, get_query_statement
+from app.utils import get_dimension_values, get_stepped_value, DimensionQuery
 
 app = FastAPI()
 
@@ -32,6 +32,11 @@ def get_session():
 
 # TODO: Env Var to set fidelity/sampling frequency
 fidelity = 10
+x_query = DimensionQuery(
+    Model=X,
+    LinkModel=XBoxLink,
+    fidelity=fidelity
+)
 
 
 # TODO: Add feature to search for all boxes near input box
@@ -51,6 +56,7 @@ def get_boxes(
     z_lte: Union[int, None] = None,
 ):
     statement = select(Box)
+    # TODO: Setup x to use x_query
     if x is not None:
         statement = statement.join(XBoxLink).join(X).where(X.id == x - x % fidelity)
     if x_gte is not None:
