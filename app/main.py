@@ -16,7 +16,7 @@ from app.models.objects import (
     ZBoxLink,
     BoxRead
 )
-from app.utils import get_dimension_values
+from app.utils import get_dimension_values, get_stepped_value, get_query_statement
 
 app = FastAPI()
 
@@ -41,12 +41,20 @@ def get_boxes(
     *,
     session: Session = Depends(get_session),
     x: Union[int, None] = None,
+    x_gte: Union[int, None] = None,
+    x_lte: Union[int, None] = None,
     y: Union[int, None] = None,
-    z: Union[int, None] = None
+    y_gte: Union[int, None] = None,
+    y_lte: Union[int, None] = None,
+    z: Union[int, None] = None,
+    z_gte: Union[int, None] = None,
+    z_lte: Union[int, None] = None,
 ):
     statement = select(Box)
     if x is not None:
         statement = statement.join(XBoxLink).join(X).where(X.id == x - x % fidelity)
+    if x_gte is not None:
+        statement = statement.join(XBoxLink).join(X).where(X.id >= x_gte - x_gte % fidelity)
     if y is not None:
         statement = statement.join(YBoxLink).join(Y).where(Y.id == y - y % fidelity)
     if z is not None:

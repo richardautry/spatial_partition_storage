@@ -1,6 +1,10 @@
 from sqlmodel import SQLModel, Session
 from sqlmodel.orm.session import _TSelectParam
-from typing import List, Optional, Type
+from typing import List, Optional, Type, Union
+
+
+def get_stepped_value(val, step_size):
+    return val - val % step_size
 
 
 def get_stepped_values(min_val: int, max_val: int, step_size: int) -> List[int]:
@@ -35,3 +39,31 @@ def get_dimension_values(
             value = model(id=stepped_value)
         values.append(value)
     return values
+
+
+class DimensionQuery:
+    def __init__(self, Model, LinkModel, fidelity: int = 0):
+        self.Model = Model
+        self.LinkModel = LinkModel
+        self.fidelity = fidelity
+
+    def get_statement(self, value: Union[int, None], statement, type: str):
+        if value is None:
+            # We don't need to append to the statement if query parm was no provided
+            return statement
+
+        statement = statement.join(self.LinkModel).join(self.Model)
+        if type == "eq":
+            return self.get_eq_statement(statement)
+        elif type == "ge":
+            return self.get_ge_statement(statement)
+        elif type == "le":
+            return self.get_le_statement(statement)
+        else:
+            raise Exception(f"Unknown statement type: {type}")
+
+    def get_eq_statement(self, statement, value):
+        return statement.where(self.Model == get_stepped_value(value, self.fidelity))
+
+    def get_ge_statement(self, statement, value):
+        return statement.where(self.Model.id >=)
