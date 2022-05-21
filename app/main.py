@@ -32,9 +32,22 @@ def get_session():
 
 # TODO: Env Var to set fidelity/sampling frequency
 fidelity = 10
+
 x_query = DimensionQuery(
     Model=X,
     LinkModel=XBoxLink,
+    fidelity=fidelity
+)
+
+y_query = DimensionQuery(
+    Model=Y,
+    LinkModel=YBoxLink,
+    fidelity=fidelity
+)
+
+z_query = DimensionQuery(
+    Model=Z,
+    LinkModel=ZBoxLink,
     fidelity=fidelity
 )
 
@@ -56,15 +69,28 @@ def get_boxes(
     z_lte: Union[int, None] = None,
 ):
     statement = select(Box)
-    # TODO: Setup x to use x_query
-    if x is not None:
-        statement = statement.join(XBoxLink).join(X).where(X.id == x - x % fidelity)
-    if x_gte is not None:
-        statement = statement.join(XBoxLink).join(X).where(X.id >= x_gte - x_gte % fidelity)
-    if y is not None:
-        statement = statement.join(YBoxLink).join(Y).where(Y.id == y - y % fidelity)
-    if z is not None:
-        statement = statement.join(ZBoxLink).join(Z).where(Z.id == z - z % fidelity)
+
+    statement = x_query.get_full_statement(
+        eq_value=x,
+        ge_value=x_gte,
+        le_value=x_lte,
+        statement=statement
+    )
+
+    statement = y_query.get_full_statement(
+        eq_value=y,
+        ge_value=y_gte,
+        le_value=y_lte,
+        statement=statement
+    )
+
+    statement = z_query.get_full_statement(
+        eq_value=z,
+        ge_value=z_gte,
+        le_value=z_lte,
+        statement=statement
+    )
+
     results = session.exec(statement).all()
     return results
 

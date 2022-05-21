@@ -50,17 +50,32 @@ class DimensionQuery:
         self.LinkModel = LinkModel
         self.fidelity = fidelity
 
-    def get_statement(self, value: Union[int, None], statement, operator_type: str):
-        if value is None:
-            # We don't need to append to the statement if query parm was no provided
+    def get_full_statement(self, eq_value, ge_value, le_value, statement):
+        if all((val is None for val in [eq_value, ge_value, le_value])):
             return statement
 
         statement = statement.join(self.LinkModel).join(self.Model)
-        if type == "eq":
+
+        value_map = {
+            "eq": eq_value,
+            "ge": ge_value,
+            "le": le_value
+        }
+
+        for operator_type, value in value_map.items():
+            statement = self.get_statement(value, statement, operator_type)
+
+        return statement
+
+    def get_statement(self, value: Union[int, None], statement, operator_type: str):
+        if value is None:
+            return statement
+
+        if operator_type == "eq":
             return self.get_eq_statement(statement, value)
-        elif type == "ge":
+        elif operator_type == "ge":
             return self.get_ge_statement(statement, value)
-        elif type == "le":
+        elif operator_type == "le":
             return self.get_le_statement(statement, value)
         else:
             raise Exception(f"Unknown statement 'operator_type': {operator_type}.\n"
