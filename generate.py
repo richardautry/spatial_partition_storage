@@ -21,7 +21,8 @@ def get_box_data(box_array):
 
 
 if __name__ == "__main__":
-    num_requests = 1000
+
+    num_requests = 100
     timing_results = []
     api_host = "http://localhost"
     boxes_endpoint = "boxes/"
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     last_time = None
     if len(timing_results) > 1:
         last_time = timing_results[-1]
-
+    # TODO: print ms
     print("Results:\n"
           f"Total Requests: {final_count + 1}\n"
           f"Average Response Time: {avg_time}s\n"
