@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import requests
-from time import perf_counter
-from utils import generate_box, generate_box_per_partition
+from time import perf_counter_ns
+from utils import generate_box, generate_box_per_partition, format_perf_time
 from requests.compat import urljoin
 import statistics
 
@@ -22,7 +22,7 @@ def get_box_data(box_array):
 
 if __name__ == "__main__":
 
-    num_requests = 1000
+    num_requests = 10
     partition_size = 100
     timing_results = []
     api_host = "http://localhost"
@@ -33,13 +33,13 @@ if __name__ == "__main__":
     box_generator = generate_box_per_partition(0, 1000, partition_size, dimensions=["x", "y", "z"])
     # Step through partitions
     i = 0
-    for box_kwargs in tqdm(list(box_generator)):
+    for box_kwargs in tqdm(list(box_generator)[:num_requests]):
         # Create boxes per partition
         final_count = i
         box_data = get_box_data(generate_box(**box_kwargs))
-        start = perf_counter()
+        start = perf_counter_ns()
         response = requests.post(boxes_url, json=box_data)
-        end = perf_counter()
+        end = perf_counter_ns()
         if response.status_code == 200:
             timing_results.append(end - start)
         else:
@@ -47,20 +47,24 @@ if __name__ == "__main__":
                   f"Response Data:\n{response.json()}")
         i += 1
 
-    avg_time = statistics.mean(timing_results)
-    fast_time = min(timing_results)
-    slow_time = max(timing_results)
-    first_time = None
+    first_time = 0
     if len(timing_results) > 0:
         first_time = timing_results[0]
-    last_time = None
+    last_time = 0
     if len(timing_results) > 1:
         last_time = timing_results[-1]
+
+    results_message = {
+        "Average Time: %s": statistics.mean(timing_results),
+        "Fastest Time: %s": min(timing_results),
+        "Slowest Time: %s": max(timing_results),
+        "First Time: %s": first_time,
+        "Last Time: %s": last_time
+    }
+
     # TODO: print ms
     print("Results:\n"
-          f"Total Requests: {final_count + 1}\n"
-          f"Average Response Time: {avg_time}s\n"
-          f"Fastest Time: {fast_time}\n"
-          f"Slowest TIme: {slow_time}\n"
-          f"First Time: {first_time}\n"
-          f"Last Time: {last_time}")
+          f"Total Requests: {final_count + 1}")
+
+    for message, result in results_message.items():
+        print(message % format_perf_time(result))

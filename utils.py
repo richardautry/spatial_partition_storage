@@ -65,19 +65,20 @@ def get_box_arg_name(dimension: str, range_type: str):
 
 
 def generate_box_per_partition(min_range: int, max_range: int, partition_size: int, dimensions: List[str]):
+    """
+    Generates kwargs for `generate_box` function
+    Will generate kwargs for each unique combination of dimensions from
+    min_range to max_range with a step = partition_size
+
+    :param min_range:
+    :param max_range:
+    :param partition_size:
+    :param dimensions:
+    :return:
+    """
     def get_dimension_args(dimension_name, range_min, range_max, step):
         return [{dimension_name: {"min": i, "max": i + step}} for i in range(range_min, range_max, step)]
 
-    # Prep box kwargs with default values
-    # for i in range(min_range, max_range, partition_size):
-    #     for dimension in dimensions:
-    #         for j in range(min_range, max_range, partition_size):
-    #             box_kwargs = {dimension: {"min": i, "max": i + partition_size} for dimension in dimensions}
-    #             for key_dimension, _ in box_kwargs.items():
-    #                 if key_dimension != dimension:
-    #                     box_kwargs[key_dimension]["min"] = j
-    #                     box_kwargs[key_dimension]["max"] = j + partition_size
-    #             yield box_kwargs
     dimension_args = [get_dimension_args(dimension, min_range, max_range, partition_size) for dimension in dimensions]
     all_args = product(*dimension_args)
     for args_output in all_args:
@@ -113,12 +114,23 @@ def add_mesh_3d(fig, coordinates: np.array, name=None):
                         [0.5, 'mediumturquoise'],
                         [1, 'magenta']],
             # Intensity of each vertex, which will be interpolated and color-coded
-            intensity = np.linspace(0, 1, 8, endpoint=True),
+            intensity=np.linspace(0, 1, 8, endpoint=True),
             # i, j and k give the vertices of triangles
-            i = [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
-            j = [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
-            k = [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
+            i=[7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
+            j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
+            k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
             name=name,
             flatshading=True
         )
     )
+
+
+def ns_to_ms(nanoseconds: float, round_return: bool = True):
+    output = nanoseconds / 10**6
+    if round_return:
+        output = round(output)
+    return output
+
+
+def format_perf_time(nanoseconds: float, round_return: bool = True):
+    return f"{ns_to_ms(nanoseconds, round_return)}ms"
