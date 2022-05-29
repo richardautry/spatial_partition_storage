@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import requests
 from time import perf_counter
-from utils import generate_box
+from utils import generate_box, generate_box_per_partition
 from requests.compat import urljoin
 import statistics
 
@@ -22,17 +22,21 @@ def get_box_data(box_array):
 
 if __name__ == "__main__":
 
-    num_requests = 100
+    num_requests = 1000
+    partition_size = 100
     timing_results = []
     api_host = "http://localhost"
     boxes_endpoint = "boxes/"
 
     boxes_url = urljoin(api_host, boxes_endpoint)
     final_count = 0
-
-    for i in tqdm(range(num_requests)):
+    box_generator = generate_box_per_partition(0, 1000, partition_size, dimensions=["x", "y", "z"])
+    # Step through partitions
+    i = 0
+    for box_kwargs in tqdm(list(box_generator)):
+        # Create boxes per partition
         final_count = i
-        box_data = get_box_data(generate_box(0, 1000))
+        box_data = get_box_data(generate_box(**box_kwargs))
         start = perf_counter()
         response = requests.post(boxes_url, json=box_data)
         end = perf_counter()
@@ -41,6 +45,7 @@ if __name__ == "__main__":
         else:
             print(f"Response Error. Status Code: {response.status_code}\n"
                   f"Response Data:\n{response.json()}")
+        i += 1
 
     avg_time = statistics.mean(timing_results)
     fast_time = min(timing_results)
