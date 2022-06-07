@@ -109,7 +109,6 @@ def add_mesh_3d(fig, coordinates: np.array, name=None):
             x=coordinates[0],
             y=coordinates[1],
             z=coordinates[2],
-            colorbar_title='z',
             colorscale=[[0, 'gold'],
                         [0.5, 'mediumturquoise'],
                         [1, 'magenta']],
@@ -120,8 +119,30 @@ def add_mesh_3d(fig, coordinates: np.array, name=None):
             j=[3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
             k=[0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
             name=name,
-            flatshading=True
+            flatshading=True,
+            showlegend=False,
+            showscale=False
         )
+    )
+
+
+def add_line_3d(fig, coordinates: np.array, name: str = None, color: str = None):
+    fig.add_trace(
+        go.Scatter3d(
+            x=coordinates[0],
+            y=coordinates[1],
+            z=coordinates[2],
+            marker={
+                "size": 2,
+                "color": color
+            },
+            line={
+                "color": color,
+                "width": 4
+            },
+            name=name,
+            showlegend=True
+        ),
     )
 
 
