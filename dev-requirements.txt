@@ -1,0 +1,4 @@
+jupyterlab==3.3.4
+ipywidgets>=7.6
+jupyter-dash
+plotly==5.7.0

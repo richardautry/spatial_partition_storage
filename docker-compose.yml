@@ -7,11 +7,16 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
   fastapi:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    build: .
+    working_dir: /code
+    command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload
+    volumes:
+      - ./app:/code/app
     ports:
       - "80:80"
     depends_on:
       - postgres
+    restart: on-failure
