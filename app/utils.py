@@ -16,11 +16,6 @@ def get_stepped_values(min_val: int, max_val: int, step_size: int) -> List[int]:
 
     Example:
     INPUT 3, 9, 2 -> OUTPUT [2, 4, 6, 8]
-
-    :param min_val:
-    :param max_val:
-    :param step_size:
-    :return:
     """
     range_min = min_val - min_val % step_size
     range_max = max_val - max_val % step_size
@@ -35,6 +30,10 @@ def get_dimension_values(
         min_val: int,
         max_val: int,
         step_size: int) -> List[Optional[_TSelectParam]]:
+    """
+    Returns the partition id values for a given dimension.
+    Creates a new id one does not exist
+    """
     values = []
     for stepped_value in get_stepped_values(min_val, max_val, step_size):
         value = session.get(model, stepped_value)
