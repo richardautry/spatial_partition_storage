@@ -16,7 +16,8 @@ from app.models.objects import (
     ZBoxLink,
     BoxRead
 )
-from app.utils import get_dimension_values, get_stepped_value, DimensionQuery
+from app.utils import get_dimension_values, DimensionQuery
+from app.cache import redis_client
 
 app = FastAPI()
 
